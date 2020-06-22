@@ -1,7 +1,13 @@
 import { Client } from "pg";
 
 let client: Client;
-
+/*
+CREATE TABLE notes(
+  id serial PRIMARY KEY,
+  content varchar(1000),
+  location integer
+  );
+*/
 export async function connectToDb() {
   try {
     client = new Client(
@@ -92,7 +98,7 @@ interface Card {
   location: number;
 }
 export function getCardsFromDb() {
-  /*   const query = `
+  const query = `
     select * from cards;
   `;
 
@@ -102,7 +108,7 @@ export function getCardsFromDb() {
       console.error(err);
       return;
     }
-  }); */
+  });
 
   let cards: Card[] = [];
 

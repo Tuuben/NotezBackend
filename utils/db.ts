@@ -4,13 +4,13 @@ let client: Client;
 
 export async function connectToDb() {
   try {
-    client = new Client({
-      //user: "",
+    client = new Client(/* {
+      user: "",
       host: process.env.DATABASE_URL,
       database: process.env.DATABASE_NAME,
-      // password: "",
+      password: "",
       port: 5432,
-    });
+    } */);
 
     await client.connect();
   } catch (err) {

@@ -1,6 +1,9 @@
 import express from "express";
-import { connectToDb } from "./utils/db";
+//import { connectToDb } from "./utils/db";
 import { initWebSocket } from "./utils/ws";
+import { connectToDb } from "./utils/db";
+
+require("dotenv").config();
 
 const app = express();
 const port = 8000;

@@ -1,5 +1,7 @@
 import * as WebSocket from "ws";
-import { deleteCardFromDB, getCardsFromDb, addCardToDb, updateCardToDb } from "./db";
+import { getCardsFromDb } from "./db";
+import _ from "lodash";
+//import { deleteCardFromDB, getCardsFromDb, addCardToDb, updateCardToDb } from "./db";
 
 type WebSocketActions =
   | "DELETE_CARD"
@@ -29,8 +31,8 @@ export async function initWebSocket(server: any) {
       console.log("some client is pongo??");
     });
 
-    ws.on("ping", () => {
-      console.log("some client is ping ponging??");
+    ws.on("close", () => {
+      console.log("tihs is actually closing??");
     });
 
     ws.on("message", (message: string) => {
@@ -45,21 +47,21 @@ export async function initWebSocket(server: any) {
 
         if (action === "DELETE_CARD") {
           const { id } = payload;
-          deleteCardFromDB(id);
+          // deleteCardFromDB(id);
           deleteCardFromList(id);
           console.log("delete card list ", cardList);
-          broadcastNewData(ws, wss, cardList);
+          broadcastNewData(ws, wss, { action: "SERVER_DELETED_CARD", payload });
         }
 
         if (action === "ADD_CARD") {
-          addCardToDb(payload);
+          //   addCardToDb(payload);
           addCardToList(payload);
           console.log("added card list ", cardList);
           broadcastNewData(ws, wss, cardList);
         }
 
         if (action === "UPDATE_CARDS") {
-          updateCardToDb(payload);
+          //  updateCardToDb(payload);
           updateCardInList(payload);
 
           console.log("SHOULD BROADCAST!!");
@@ -70,21 +72,6 @@ export async function initWebSocket(server: any) {
         console.log("Message ", message);
       }
     });
-
-    // Check if alive
-
-    //GOOGLE HOW TO CHECK IF WS IS ALIVE ON SERVER
-
-    /*    setInterval(() => {
-      wss.clients.forEach((webSocket, webSocket2, set) => {
-        webSocket.rea 
-        return ws.terminate();
-
-        wsIsAlive = false;
-        ws.ping(null, false);
-      });
-    }, 10000); */
-
     //send immediatly a feedback to the incoming connection
     ws.send(JSON.stringify({ payload: cardList, action: "INIT_WS_CONNECTION" }));
 
@@ -95,7 +82,8 @@ export async function initWebSocket(server: any) {
 function broadcastNewData(ws: WebSocket, wss: WebSocket.Server, socketData: WebSocketData) {
   if (!!wss.clients) {
     wss.clients.forEach((client) => {
-      if (ws !== client) {
+      //TODO / BUG: client that sent value still seems to receive send event?
+      if (!_.isEqual(ws, client)) {
         console.log("Broadcasted info to a client");
         client.send(JSON.stringify(socketData));
       }
@@ -104,8 +92,7 @@ function broadcastNewData(ws: WebSocket, wss: WebSocket.Server, socketData: WebS
 }
 
 function deleteCardFromList(cardId: string) {
-  const cardIndex = cardList.findIndex((c: any) => c.id === cardId);
-  cardList.splice(cardIndex, 0);
+  cardList = cardList.filter((c: any) => c.id !== cardId);
 }
 
 function addCardToList(card: any) {

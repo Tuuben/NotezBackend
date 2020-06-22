@@ -54,10 +54,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initWebSocket = void 0;
 var WebSocket = __importStar(require("ws"));
 var db_1 = require("./db");
+var lodash_1 = __importDefault(require("lodash"));
 // Populate cardlist fix
 var cardList = [];
 // TODO: Find type
@@ -71,8 +75,8 @@ function initWebSocket(server) {
                 ws.on("pong", function () {
                     console.log("some client is pongo??");
                 });
-                ws.on("ping", function () {
-                    console.log("some client is ping ponging??");
+                ws.on("close", function () {
+                    console.log("tihs is actually closing??");
                 });
                 ws.on("message", function (message) {
                     try {
@@ -83,19 +87,19 @@ function initWebSocket(server) {
                         }
                         if (action === "DELETE_CARD") {
                             var id = payload.id;
-                            db_1.deleteCardFromDB(id);
+                            // deleteCardFromDB(id);
                             deleteCardFromList(id);
                             console.log("delete card list ", cardList);
-                            broadcastNewData(ws, wss, cardList);
+                            broadcastNewData(ws, wss, { action: "SERVER_DELETED_CARD", payload: payload });
                         }
                         if (action === "ADD_CARD") {
-                            db_1.addCardToDb(payload);
+                            //   addCardToDb(payload);
                             addCardToList(payload);
                             console.log("added card list ", cardList);
                             broadcastNewData(ws, wss, cardList);
                         }
                         if (action === "UPDATE_CARDS") {
-                            db_1.updateCardToDb(payload);
+                            //  updateCardToDb(payload);
                             updateCardInList(payload);
                             console.log("SHOULD BROADCAST!!");
                             // Only send actual updated items
@@ -106,17 +110,6 @@ function initWebSocket(server) {
                         console.log("Message ", message);
                     }
                 });
-                // Check if alive
-                //GOOGLE HOW TO CHECK IF WS IS ALIVE ON SERVER
-                /*    setInterval(() => {
-                  wss.clients.forEach((webSocket, webSocket2, set) => {
-                    webSocket.rea
-                    return ws.terminate();
-            
-                    wsIsAlive = false;
-                    ws.ping(null, false);
-                  });
-                }, 10000); */
                 //send immediatly a feedback to the incoming connection
                 ws.send(JSON.stringify({ payload: cardList, action: "INIT_WS_CONNECTION" }));
                 return wss;
@@ -129,7 +122,8 @@ exports.initWebSocket = initWebSocket;
 function broadcastNewData(ws, wss, socketData) {
     if (!!wss.clients) {
         wss.clients.forEach(function (client) {
-            if (ws !== client) {
+            //TODO / BUG: client that sent value still seems to receive send event?
+            if (!lodash_1.default.isEqual(ws, client)) {
                 console.log("Broadcasted info to a client");
                 client.send(JSON.stringify(socketData));
             }
@@ -137,8 +131,7 @@ function broadcastNewData(ws, wss, socketData) {
     }
 }
 function deleteCardFromList(cardId) {
-    var cardIndex = cardList.findIndex(function (c) { return c.id === cardId; });
-    cardList.splice(cardIndex, 0);
+    cardList = cardList.filter(function (c) { return c.id !== cardId; });
 }
 function addCardToList(card) {
     cardList.push(card);

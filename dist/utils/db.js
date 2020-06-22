@@ -38,49 +38,74 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCardsFromDb = exports.updateCardToDb = exports.addCardToDb = exports.deleteCardFromDB = exports.connectToDb = void 0;
 var pg_1 = require("pg");
+var client;
 function connectToDb() {
     return __awaiter(this, void 0, void 0, function () {
-        var client, query;
+        var err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    client = new pg_1.Client({
-                        user: "postgres",
-                        host: "localhost",
-                        database: "thel",
-                        password: "",
-                        port: 5432,
-                    });
+                    _a.trys.push([0, 2, , 3]);
+                    client = new pg_1.Client( /* {
+                      //user: "",
+                      host: process.env.DATABASE_URL,
+                      database: process.env.DATABASE_NAME,
+                      // password: "",
+                      port: 5432,
+                    } */);
                     return [4 /*yield*/, client.connect()];
                 case 1:
                     _a.sent();
-                    query = "\n        select * from cards\n    ";
-                    client.query(query, function (err, res) {
-                        if (err) {
-                            console.error(err);
-                            return;
-                        }
-                        //  console.log("Table is successfully created", res);
-                    });
-                    return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    console.log(err_1);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });
 }
 exports.connectToDb = connectToDb;
 function deleteCardFromDB(cardId) {
-    // Impelemnt query to remove card from DB
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/];
+        });
+    });
 }
 exports.deleteCardFromDB = deleteCardFromDB;
 function addCardToDb(card) {
-    // Implement add card to db
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/];
+        });
+    });
 }
 exports.addCardToDb = addCardToDb;
 function updateCardToDb(card) {
-    // Implement udpate card at id
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/];
+        });
+    });
 }
 exports.updateCardToDb = updateCardToDb;
 function getCardsFromDb() {
+    /*  if (!client) {
+      await connectToDb();
+    }
+  
+    const query = `
+      select * from cards;
+    `;
+  
+    client.query(query, (err: any, res: any) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+    }); */
     var cards = [];
     for (var i = 0; i < 1000; i++) {
         cards.push({

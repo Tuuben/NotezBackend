@@ -1,62 +1,101 @@
 import { Client } from "pg";
 
-// TODO move
-interface Card {
-  id: number;
-  content: string;
-  location: number;
-}
+let client: Client;
 
 export async function connectToDb() {
-  const client = new Client({
-    user: "postgres",
-    host: "localhost",
-    database: "thel",
-    password: "",
-    port: 5432,
-  });
+  try {
+    client = new Client({
+      //user: "",
+      host: process.env.DATABASE_URL,
+      database: process.env.DATABASE_NAME,
+      // password: "",
+      port: 5432,
+    });
 
-  await client.connect();
+    await client.connect();
+  } catch (err) {
+    console.log(err);
+  }
+}
 
-  /*
+export async function deleteCardFromDB(cardId: string) {
+  /*   if (!client) {
+    await connectToDb();
+  }
 
-    CREATE TABLE users (
-        email varchar,
-        firstName varchar,
-        lastName varchar,
-        age int
-    );
-
-     INSERT INTO cards (content, location)
-        VALUES ('Hello world card', 1);
-   */
-
+  // Impelemnt query to remove card from DB
   const query = `
-        select * from cards
-    `;
+    delete from cards
+    where cards.id = ${cardId} 
+  `;
 
   client.query(query, (err: any, res: any) => {
     if (err) {
       console.error(err);
       return;
     }
-    //  console.log("Table is successfully created", res);
-  });
+  }); */
 }
 
-export function deleteCardFromDB(cardId: string) {
-  // Impelemnt query to remove card from DB
+export async function addCardToDb(card: Card) {
+  /*  if (!client) {
+    await connectToDb();
+  }
+
+  const query = `
+    insert into cards(location, content)
+    values(${card.location}, ${card.content})
+  `;
+
+  client.query(query, (err: any, res: any) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+  }); */
 }
 
-export function addCardToDb(card: Card) {
-  // Implement add card to db
+export async function updateCardToDb(card: Card) {
+  /*  if (!client) {
+    await connectToDb();
+  }
+
+  const query = `
+    update cards
+    set location = ${card.location},
+    set content = ${card.content},
+    where cards.id = ${card.id}
+  `;
+
+  client.query(query, (err: any, res: any) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+  }); */
 }
 
-export function updateCardToDb(card: Card) {
-  // Implement udpate card at id
+interface Card {
+  id: number;
+  content: string;
+  location: number;
 }
-
 export function getCardsFromDb() {
+  /*  if (!client) {
+    await connectToDb();
+  }
+
+  const query = `
+    select * from cards;
+  `;
+
+  client.query(query, (err: any, res: any) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+  }); */
+
   let cards: Card[] = [];
 
   for (let i = 0; i < 1000; i++) {

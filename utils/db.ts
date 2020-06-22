@@ -7,7 +7,7 @@ export async function connectToDb() {
     client = new Client({
       //user: "",
       host: process.env.DATABASE_URL,
-      database: process.env.DATABASE_NAME,
+      //  database: process.env.DATABASE_NAME,
       // password: "",
       port: 5432,
     });

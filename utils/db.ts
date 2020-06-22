@@ -4,13 +4,22 @@ let client: Client;
 
 export async function connectToDb() {
   try {
-    client = new Client({
-      //user: "",
-      host: process.env.DATABASE_URL,
-      //  database: process.env.DATABASE_NAME,
-      // password: "",
-      port: 5432,
-    });
+    client = new Client(
+      process.env.PRODUCTION
+        ? {
+            connectionString: process.env.DATABASE_URL,
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          }
+        : {
+            user: "thel",
+            host: process.env.DATABASE_URL,
+            database: process.env.DATABASE_NAME,
+            // password: "",
+            port: 5432,
+          }
+    );
 
     await client.connect();
 

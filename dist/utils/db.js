@@ -46,16 +46,17 @@ function connectToDb() {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    client = new pg_1.Client( /* {
-                      //user: "",
-                      host: process.env.DATABASE_URL,
-                      database: process.env.DATABASE_NAME,
-                      // password: "",
-                      port: 5432,
-                    } */);
+                    client = new pg_1.Client({
+                        //user: "",
+                        host: process.env.DATABASE_URL,
+                        database: process.env.DATABASE_NAME,
+                        // password: "",
+                        port: 5432,
+                    });
                     return [4 /*yield*/, client.connect()];
                 case 1:
                     _a.sent();
+                    console.log("Successfully connected to postgres");
                     return [3 /*break*/, 3];
                 case 2:
                     err_1 = _a.sent();
@@ -92,15 +93,12 @@ function updateCardToDb(card) {
 }
 exports.updateCardToDb = updateCardToDb;
 function getCardsFromDb() {
-    /*  if (!client) {
-      await connectToDb();
-    }
-  
-    const query = `
+    /*   const query = `
       select * from cards;
     `;
   
     client.query(query, (err: any, res: any) => {
+      console.log("RES FROM cards", res);
       if (err) {
         console.error(err);
         return;

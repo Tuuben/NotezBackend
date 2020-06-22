@@ -5,15 +5,16 @@ let client: Client;
 export async function connectToDb() {
   try {
     client = new Client({
-      user: "igepwuyfnzsjnc",
-      host:
-        "postgres://igepwuyfnzsjnc:239a2d6e3c6d905ceb8df4563e3c6df0ab727904e6dc2d45de9ed0f6c44d87d9@ec2-54-247-78-30.eu-west-1.compute.amazonaws.com:5432/der3pgfsa556cr",
-      database: "der3pgfsa556cr", // process.env.DATABASE_NAME,
-      password: "239a2d6e3c6d905ceb8df4563e3c6df0ab727904e6dc2d45de9ed0f6c44d87d9",
+      //user: "",
+      host: process.env.DATABASE_URL,
+      database: process.env.DATABASE_NAME,
+      // password: "",
       port: 5432,
     });
 
     await client.connect();
+
+    console.log("Successfully connected to postgres");
   } catch (err) {
     console.log(err);
   }
@@ -82,15 +83,12 @@ interface Card {
   location: number;
 }
 export function getCardsFromDb() {
-  /*  if (!client) {
-    await connectToDb();
-  }
-
-  const query = `
+  /*   const query = `
     select * from cards;
   `;
 
   client.query(query, (err: any, res: any) => {
+    console.log("RES FROM cards", res);
     if (err) {
       console.error(err);
       return;

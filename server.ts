@@ -1,15 +1,12 @@
+require("dotenv").config();
 import express from "express";
 //import { connectToDb } from "./utils/db";
 import { initWebSocket } from "./utils/ws";
-import { connectToDb } from "./utils/db";
-
-require("dotenv").config();
+import "./utils/db";
 
 const app = express();
 const port = process.env.PORT || 8000;
 
 const server = app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
-
-connectToDb();
 
 const ws = initWebSocket(server);

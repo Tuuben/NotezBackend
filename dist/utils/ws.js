@@ -54,66 +54,59 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initWebSocket = void 0;
 var WebSocket = __importStar(require("ws"));
-var db_1 = require("./db");
-var lodash_1 = __importDefault(require("lodash"));
-// Populate cardlist fix
-var cardList = [];
+var noteController_1 = require("../controllers/noteController");
 // TODO: Find type
 function initWebSocket(server) {
     return __awaiter(this, void 0, void 0, function () {
         var wss;
+        var _this = this;
         return __generator(this, function (_a) {
             wss = new WebSocket.Server({ server: server });
-            cardList = db_1.getCardsFromDb();
-            wss.on("connection", function (ws) {
-                ws.on("pong", function () {
-                    console.log("some client is pongo??");
-                });
-                ws.on("close", function () {
-                    console.log("tihs is actually closing??");
-                });
-                ws.on("message", function (message) {
-                    try {
-                        var data = JSON.parse(message);
-                        var action = data.action, payload = data.payload, params = data.params;
-                        if (!action || !payload) {
-                            return;
-                        }
-                        if (action === "DELETE_CARD") {
-                            var id = payload.id;
-                            // deleteCardFromDB(id);
-                            deleteCardFromList(id);
-                            console.log("delete card list ", cardList);
-                            broadcastNewData(ws, wss, { action: "SERVER_DELETED_CARD", payload: payload });
-                        }
-                        if (action === "ADD_CARD") {
-                            //   addCardToDb(payload);
-                            addCardToList(payload);
-                            console.log("added card list ", cardList);
-                            broadcastNewData(ws, wss, cardList);
-                        }
-                        if (action === "UPDATE_CARDS") {
-                            //  updateCardToDb(payload);
-                            updateCardInList(payload);
-                            console.log("SHOULD BROADCAST!!");
-                            // Only send actual updated items
-                            broadcastNewData(ws, wss, { action: "SERVER_UPDATED_CARDS", payload: payload });
-                        }
+            wss.on("connection", function (ws) { return __awaiter(_this, void 0, void 0, function () {
+                var noteList;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            /*     ws.on("close", () => {
+                              console.log("Socket is closing");
+                            }); */
+                            ws.on("message", function (message) {
+                                try {
+                                    var data = JSON.parse(message);
+                                    var action = data.action, payload = data.payload, params = data.params;
+                                    if (!action || !payload) {
+                                        return;
+                                    }
+                                    if (action === "DELETE_NOTE") {
+                                        var id = payload.id;
+                                        noteController_1.deleteNote(id);
+                                        broadcastNewData(ws, wss, { action: "SERVER_DELETED_NOTE", payload: payload });
+                                    }
+                                    if (action === "ADD_NOTE") {
+                                        noteController_1.addNote(payload);
+                                        broadcastNewData(ws, wss, { action: "SERVER_ADDED_NOTE", payload: payload });
+                                    }
+                                    if (action === "UPDATE_NOTES") {
+                                        noteController_1.updateNotes(payload);
+                                        // Only send actual updated items
+                                        broadcastNewData(ws, wss, { action: "SERVER_UPDATED_NOTES", payload: payload });
+                                    }
+                                }
+                                catch (err) {
+                                    console.log("Message ", message);
+                                }
+                            });
+                            return [4 /*yield*/, noteController_1.getNotesFromDb()];
+                        case 1:
+                            noteList = _a.sent();
+                            ws.send(JSON.stringify({ payload: noteList, action: "INIT_WS_CONNECTION" }));
+                            return [2 /*return*/, wss];
                     }
-                    catch (err) {
-                        console.log("Message ", message);
-                    }
                 });
-                //send immediatly a feedback to the incoming connection
-                ws.send(JSON.stringify({ payload: cardList, action: "INIT_WS_CONNECTION" }));
-                return wss;
-            });
+            }); });
             return [2 /*return*/];
         });
     });
@@ -121,27 +114,12 @@ function initWebSocket(server) {
 exports.initWebSocket = initWebSocket;
 function broadcastNewData(ws, wss, socketData) {
     if (!!wss.clients) {
+        console.log("NUMBER OF CLIENTS ", wss.clients.size);
         wss.clients.forEach(function (client) {
-            //TODO / BUG: client that sent value still seems to receive send event?
-            if (!lodash_1.default.isEqual(ws, client)) {
+            if (ws !== client) {
                 console.log("Broadcasted info to a client");
                 client.send(JSON.stringify(socketData));
             }
         });
     }
-}
-function deleteCardFromList(cardId) {
-    cardList = cardList.filter(function (c) { return c.id !== cardId; });
-}
-function addCardToList(card) {
-    cardList.push(card);
-}
-function updateCardInList(cards) {
-    cardList = cardList.map(function (card) {
-        var foundCard = cards.find(function (c) { return c.id === card.id; });
-        if (foundCard) {
-            return foundCard;
-        }
-        return card;
-    });
 }

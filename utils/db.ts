@@ -1,124 +1,64 @@
-import { Client } from "pg";
+import { Pool } from "pg";
 
-let client: Client;
-/*
-CREATE TABLE notes(
-  id serial PRIMARY KEY,
-  content varchar(1000),
-  location integer
-  );
-*/
-export async function connectToDb() {
-  try {
-    client = new Client(
-      process.env.PRODUCTION
-        ? {
-            connectionString: process.env.DATABASE_URL,
-            ssl: {
-              rejectUnauthorized: false,
-            },
-          }
-        : {
-            user: "thel",
-            host: process.env.DATABASE_URL,
-            database: process.env.DATABASE_NAME,
-            // password: "",
-            port: 5432,
-          }
-    );
+const config = {
+  user: process.env.DATABASE_USER,
+  host: process.env.DATABASE_URL,
+  database: process.env.DATABASE_NAME,
+  // password: "",
+  port: 5432,
+};
 
-    await client.connect();
+export const pool = new Pool(config);
+/* 
+export const createTable = (table: string) => {
+  const query = `CREATE TABLE ${table} ( ...column )`;
 
-    console.log("Successfully connected to postgres");
-  } catch (err) {
-    console.log(err);
-  }
-}
+  return pool.query(query);
+}; */
 
-export async function deleteCardFromDB(cardId: string) {
-  /*   if (!client) {
-    await connectToDb();
-  }
-
-  // Impelemnt query to remove card from DB
+export const deleteItem = (table: string, id: any) => {
   const query = `
-    delete from cards
-    where cards.id = ${cardId} 
+    delete from ${table}
+    where id = ${id}
   `;
 
-  client.query(query, (err: any, res: any) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-  }); */
-}
+  return pool.query(query);
+};
 
-export async function addCardToDb(card: Card) {
-  /*  if (!client) {
-    await connectToDb();
-  }
-
+export const addRow = (table: string, cols: string[], values: any[]) => {
+  const colStr = cols.join();
+  const valuesStr = values.reduce((prev, cur, index) => {
+    const curValue = typeof cur === "string" ? `'${cur}'` : cur;
+    return prev + (index > 0 ? "," : "") + curValue;
+  }, "");
   const query = `
-    insert into cards(location, content)
-    values(${card.location}, ${card.content})
+    insert into ${table}(${colStr})
+    values(${valuesStr})
   `;
 
-  client.query(query, (err: any, res: any) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-  }); */
-}
+  return pool.query(query);
+};
 
-export async function updateCardToDb(card: Card) {
-  /*  if (!client) {
-    await connectToDb();
-  }
-
-  const query = `
-    update cards
-    set location = ${card.location},
-    set content = ${card.content},
-    where cards.id = ${card.id}
-  `;
-
-  client.query(query, (err: any, res: any) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-  }); */
-}
-
-interface Card {
-  id: number;
-  content: string;
-  location: number;
-}
-export function getCardsFromDb() {
-  const query = `
-    select * from cards;
-  `;
-
-  client.query(query, (err: any, res: any) => {
-    console.log("RES FROM cards", res);
-    if (err) {
-      console.error(err);
-      return;
-    }
+export const updateRow = (table: string, id: any, fields: string[], values: any[]) => {
+  const updateStr = fields.map((field, index) => {
+    const val = values[index] || "";
+    const valStr = typeof val === "string" ? `'${val}'` : val;
+    return `${field} = ${valStr}`;
   });
+  const query = `
+    UPDATE ${table}
+    SET ${updateStr.join()}
+    WHERE id = ${id}
+  `;
 
-  let cards: Card[] = [];
+  return pool.query(query);
+};
 
-  for (let i = 0; i < 1000; i++) {
-    cards.push({
-      id: i,
-      content: `Lorem ${i}`,
-      location: i,
-    });
-  }
+export const getRows = (table: string, fields: string[]) => {
+  const fieldStr = fields.join();
+  const query = `
+    SELECT ${fieldStr} FROM ${table}
+  `;
 
-  return cards;
-}
+  return pool.query(query);
+};

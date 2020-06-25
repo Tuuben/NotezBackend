@@ -1,39 +1,28 @@
 import * as WebSocket from "ws";
-import { getCardsFromDb } from "./db";
-import _ from "lodash";
-//import { deleteCardFromDB, getCardsFromDb, addCardToDb, updateCardToDb } from "./db";
+import { getNotesFromDb, deleteNote, addNote, updateNotes } from "../controllers/noteController";
 
-type WebSocketActions =
-  | "DELETE_CARD"
-  | "ADD_CARD"
-  | "UPDATE_CARDS"
+type WebSocketAction =
+  | "DELETE_NOTE"
+  | "ADD_NOTE"
+  | "UPDATE_NOTES"
   | "INIT_WS_CONNECTION"
-  | "SERVER_UPDATED_CARDS"
-  | "SERVER_DELETED_CARD"
-  | "SERVER_ADDED_CARD";
+  | "SERVER_UPDATED_NOTES"
+  | "SERVER_DELETED_NOTE"
+  | "SERVER_ADDED_NOTE";
 interface WebSocketData {
-  action: WebSocketActions;
+  action: WebSocketAction;
   payload: any;
   params?: any;
 }
-
-// Populate cardlist fix
-let cardList: any = [];
 
 // TODO: Find type
 export async function initWebSocket(server: any) {
   const wss = new WebSocket.Server({ server });
 
-  cardList = getCardsFromDb();
-
-  wss.on("connection", (ws: WebSocket) => {
-    ws.on("pong", () => {
-      console.log("some client is pongo??");
-    });
-
-    ws.on("close", () => {
-      console.log("tihs is actually closing??");
-    });
+  wss.on("connection", async (ws: WebSocket) => {
+    /*     ws.on("close", () => {
+      console.log("Socket is closing");
+    }); */
 
     ws.on("message", (message: string) => {
       try {
@@ -45,35 +34,30 @@ export async function initWebSocket(server: any) {
           return;
         }
 
-        if (action === "DELETE_CARD") {
+        if (action === "DELETE_NOTE") {
           const { id } = payload;
-          // deleteCardFromDB(id);
-          deleteCardFromList(id);
-          console.log("delete card list ", cardList);
-          broadcastNewData(ws, wss, { action: "SERVER_DELETED_CARD", payload });
+          deleteNote(id);
+          broadcastNewData(ws, wss, { action: "SERVER_DELETED_NOTE", payload });
         }
 
-        if (action === "ADD_CARD") {
-          //   addCardToDb(payload);
-          addCardToList(payload);
-          console.log("added card list ", cardList);
-          broadcastNewData(ws, wss, cardList);
+        if (action === "ADD_NOTE") {
+          addNote(payload);
+          broadcastNewData(ws, wss, { action: "SERVER_ADDED_NOTE", payload });
         }
 
-        if (action === "UPDATE_CARDS") {
-          //  updateCardToDb(payload);
-          updateCardInList(payload);
-
-          console.log("SHOULD BROADCAST!!");
+        if (action === "UPDATE_NOTES") {
+          updateNotes(payload);
           // Only send actual updated items
-          broadcastNewData(ws, wss, { action: "SERVER_UPDATED_CARDS", payload });
+          broadcastNewData(ws, wss, { action: "SERVER_UPDATED_NOTES", payload });
         }
       } catch (err) {
         console.log("Message ", message);
       }
     });
-    //send immediatly a feedback to the incoming connection
-    ws.send(JSON.stringify({ payload: cardList, action: "INIT_WS_CONNECTION" }));
+
+    // New connection send inital cardList
+    const noteList = await getNotesFromDb();
+    ws.send(JSON.stringify({ payload: noteList, action: "INIT_WS_CONNECTION" }));
 
     return wss;
   });
@@ -81,32 +65,12 @@ export async function initWebSocket(server: any) {
 
 function broadcastNewData(ws: WebSocket, wss: WebSocket.Server, socketData: WebSocketData) {
   if (!!wss.clients) {
+    console.log("NUMBER OF CLIENTS ", wss.clients.size);
     wss.clients.forEach((client) => {
-      //TODO / BUG: client that sent value still seems to receive send event?
-      if (!_.isEqual(ws, client)) {
+      if (ws !== client) {
         console.log("Broadcasted info to a client");
         client.send(JSON.stringify(socketData));
       }
     });
   }
-}
-
-function deleteCardFromList(cardId: string) {
-  cardList = cardList.filter((c: any) => c.id !== cardId);
-}
-
-function addCardToList(card: any) {
-  cardList.push(card);
-}
-
-function updateCardInList(cards: any) {
-  cardList = cardList.map((card: any) => {
-    const foundCard = cards.find((c: any) => c.id === card.id);
-
-    if (foundCard) {
-      return foundCard;
-    }
-
-    return card;
-  });
 }

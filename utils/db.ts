@@ -15,7 +15,7 @@ const productionConfig = {
   },
 };
 
-export const pool = new Pool(process.env.PRODUCTION ? productionConfig : config);
+export const pool = new Pool(process.env.PRODUCTION === "true" ? productionConfig : config);
 /* 
 export const createTable = (table: string) => {
   const query = `CREATE TABLE ${table} ( ...column )`;

@@ -9,7 +9,14 @@ var config = {
     // password: "",
     port: 5432,
 };
-exports.pool = new pg_1.Pool(config);
+var productionConfig = {
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false,
+    },
+};
+console.log(process.env.PRODUCTION === "true");
+exports.pool = new pg_1.Pool(process.env.PRODUCTION === "true" ? productionConfig : config);
 /*
 export const createTable = (table: string) => {
   const query = `CREATE TABLE ${table} ( ...column )`;

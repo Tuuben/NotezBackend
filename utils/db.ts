@@ -8,7 +8,14 @@ const config = {
   port: 5432,
 };
 
-export const pool = new Pool(config);
+const productionConfig = {
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+};
+
+export const pool = new Pool(process.env.PRODUCTION ? productionConfig : config);
 /* 
 export const createTable = (table: string) => {
   const query = `CREATE TABLE ${table} ( ...column )`;

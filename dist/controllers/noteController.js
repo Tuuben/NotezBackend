@@ -48,8 +48,9 @@ exports.deleteNote = function (id) {
 };
 exports.addNote = function (note) {
     try {
-        var location_1 = note.location, content = note.content;
-        db_1.addRow("notes", ["location", "content"], [location_1, content]);
+        var id = note.id, location_1 = note.location, content = note.content;
+        var updatedAt = new Date().toDateString();
+        db_1.addRow("notes", ["id", "location", "content", "updated_at"], [id, location_1, content, updatedAt]);
     }
     catch (err) {
         console.error(err);

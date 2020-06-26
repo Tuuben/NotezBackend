@@ -15,7 +15,6 @@ var productionConfig = {
         rejectUnauthorized: false,
     },
 };
-console.log(process.env.PRODUCTION === "true");
 exports.pool = new pg_1.Pool(process.env.PRODUCTION === "true" ? productionConfig : config);
 /*
 export const createTable = (table: string) => {
@@ -24,7 +23,8 @@ export const createTable = (table: string) => {
   return pool.query(query);
 }; */
 exports.deleteItem = function (table, id) {
-    var query = "\n    delete from " + table + "\n    where id = " + id + "\n  ";
+    var query = "\n    delete from " + table + "\n    where id = '" + id + "'\n  ";
+    console.log(query);
     return exports.pool.query(query);
 };
 exports.addRow = function (table, cols, values) {
@@ -34,6 +34,7 @@ exports.addRow = function (table, cols, values) {
         return prev + (index > 0 ? "," : "") + curValue;
     }, "");
     var query = "\n    insert into " + table + "(" + colStr + ")\n    values(" + valuesStr + ")\n  ";
+    console.log("ADDED NEW", query);
     return exports.pool.query(query);
 };
 exports.updateRow = function (table, id, fields, values) {
@@ -42,7 +43,7 @@ exports.updateRow = function (table, id, fields, values) {
         var valStr = typeof val === "string" ? "'" + val + "'" : val;
         return field + " = " + valStr;
     });
-    var query = "\n    UPDATE " + table + "\n    SET " + updateStr.join() + "\n    WHERE id = " + id + "\n  ";
+    var query = "\n    UPDATE " + table + "\n    SET " + updateStr.join() + "\n    WHERE id = '" + id + "'\n  ";
     console.log("UPDATE Q ", query);
     return exports.pool.query(query);
 };

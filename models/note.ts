@@ -1,6 +1,6 @@
 export interface Note {
   [index: string]: number | string | boolean | undefined;
-  id: number;
+  id: string;
   content?: string;
   location?: number;
   selected?: boolean;

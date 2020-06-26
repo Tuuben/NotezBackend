@@ -23,11 +23,13 @@ export const createTable = (table: string) => {
   return pool.query(query);
 }; */
 
-export const deleteItem = (table: string, id: any) => {
+export const deleteItem = (table: string, id: string) => {
   const query = `
     delete from ${table}
-    where id = ${id}
+    where id = '${id}'
   `;
+
+  console.log(query);
 
   return pool.query(query);
 };
@@ -43,10 +45,12 @@ export const addRow = (table: string, cols: string[], values: any[]) => {
     values(${valuesStr})
   `;
 
+  console.log("ADDED NEW", query);
+
   return pool.query(query);
 };
 
-export const updateRow = (table: string, id: any, fields: string[], values: any[]) => {
+export const updateRow = (table: string, id: string, fields: string[], values: any[]) => {
   const updateStr = fields.map((field, index) => {
     const val = values[index] || "";
     const valStr = typeof val === "string" ? `'${val}'` : val;
@@ -55,7 +59,7 @@ export const updateRow = (table: string, id: any, fields: string[], values: any[
   const query = `
     UPDATE ${table}
     SET ${updateStr.join()}
-    WHERE id = ${id}
+    WHERE id = '${id}'
   `;
 
   console.log("UPDATE Q ", query);

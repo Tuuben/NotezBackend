@@ -11,8 +11,9 @@ export const deleteNote = (id: string) => {
 
 export const addNote = (note: Note) => {
   try {
-    const { location, content } = note;
-    addRow("notes", ["location", "content"], [location, content]);
+    const { id, location, content } = note;
+    const updatedAt = new Date().toDateString();
+    addRow("notes", ["id", "location", "content", "updated_at"], [id, location, content, updatedAt]);
   } catch (err) {
     console.error(err);
   }

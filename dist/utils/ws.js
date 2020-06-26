@@ -58,7 +58,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.initWebSocket = void 0;
 var WebSocket = __importStar(require("ws"));
 var noteController_1 = require("../controllers/noteController");
-// TODO: Find type
 function initWebSocket(server) {
     return __awaiter(this, void 0, void 0, function () {
         var wss;
@@ -91,7 +90,6 @@ function initWebSocket(server) {
                                     }
                                     if (action === "UPDATE_NOTES") {
                                         noteController_1.updateNotes(payload);
-                                        // Only send actual updated items
                                         broadcastNewData(ws, wss, { action: "SERVER_UPDATED_NOTES", payload: payload });
                                     }
                                 }

@@ -15,7 +15,6 @@ interface WebSocketData {
   params?: any;
 }
 
-// TODO: Find type
 export async function initWebSocket(server: any) {
   const wss = new WebSocket.Server({ server });
 
@@ -47,7 +46,6 @@ export async function initWebSocket(server: any) {
 
         if (action === "UPDATE_NOTES") {
           updateNotes(payload);
-          // Only send actual updated items
           broadcastNewData(ws, wss, { action: "SERVER_UPDATED_NOTES", payload });
         }
       } catch (err) {

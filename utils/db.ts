@@ -51,6 +51,8 @@ export const updateRow = (table: string, id: any, fields: string[], values: any[
     WHERE id = ${id}
   `;
 
+  console.log("UPDATE Q ", query);
+
   return pool.query(query);
 };
 

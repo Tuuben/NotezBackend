@@ -2,36 +2,14 @@ import { deleteItem, addRow, getRows, updateRow } from "../utils/db";
 import { Note } from "../models/note";
 
 export const deleteNote = (id: string) => {
-  _deleteNoteFromDb(id);
+  try {
+    deleteItem("notes", id);
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 export const addNote = (note: Note) => {
-  _addCardToDb(note);
-};
-
-export const updateNotes = (notes: Note[]) => {
-  _updateCardsToDb(notes);
-};
-
-export const getNotesFromDb = async () => {
-  try {
-    const res = await getRows("notes", ["*"]);
-    const { rows } = res;
-    return rows;
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-const _deleteNoteFromDb = (cardId: string) => {
-  try {
-    deleteItem("notes", cardId);
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-const _addCardToDb = (note: Note) => {
   try {
     const { location, content } = note;
     addRow("notes", ["location", "content"], [location, content]);
@@ -40,12 +18,26 @@ const _addCardToDb = (note: Note) => {
   }
 };
 
-const _updateCardsToDb = (notes: Note[]) => {
+export const updateNotes = (notes: Note[]) => {
   try {
     notes.forEach((note) => {
-      const { id, location, content } = note;
-      updateRow("notes", id, ["location", "content"], [location, content]);
+      const { id } = note;
+
+      // TODO: Refactor
+      const columns: string[] = Object.keys(note).filter((k) => k == "location" || k === "content");
+      const values = columns.map((key) => note[key]);
+      updateRow("notes", id, columns, values);
     });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const getNotesFromDb = async () => {
+  try {
+    const res = await getRows("notes", ["*"]);
+    const { rows } = res;
+    return rows;
   } catch (err) {
     console.error(err);
   }

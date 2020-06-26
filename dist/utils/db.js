@@ -36,6 +36,7 @@ exports.updateRow = function (table, id, fields, values) {
         return field + " = " + valStr;
     });
     var query = "\n    UPDATE " + table + "\n    SET " + updateStr.join() + "\n    WHERE id = " + id + "\n  ";
+    console.log("UPDATE Q ", query);
     return exports.pool.query(query);
 };
 exports.getRows = function (table, fields) {

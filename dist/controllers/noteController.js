@@ -39,13 +39,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNotesFromDb = exports.updateNotes = exports.addNote = exports.deleteNote = void 0;
 var db_1 = require("../utils/db");
 exports.deleteNote = function (id) {
-    _deleteNoteFromDb(id);
+    try {
+        db_1.deleteItem("notes", id);
+    }
+    catch (err) {
+        console.error(err);
+    }
 };
 exports.addNote = function (note) {
-    _addCardToDb(note);
+    try {
+        var location_1 = note.location, content = note.content;
+        db_1.addRow("notes", ["location", "content"], [location_1, content]);
+    }
+    catch (err) {
+        console.error(err);
+    }
 };
 exports.updateNotes = function (notes) {
-    _updateCardsToDb(notes);
+    try {
+        notes.forEach(function (note) {
+            var id = note.id;
+            // TODO: Refactor
+            var columns = Object.keys(note).filter(function (k) { return k == "location" || k === "content"; });
+            var values = columns.map(function (key) { return note[key]; });
+            db_1.updateRow("notes", id, columns, values);
+        });
+    }
+    catch (err) {
+        console.error(err);
+    }
 };
 exports.getNotesFromDb = function () { return __awaiter(void 0, void 0, void 0, function () {
     var res, rows, err_1;
@@ -66,31 +88,3 @@ exports.getNotesFromDb = function () { return __awaiter(void 0, void 0, void 0, 
         }
     });
 }); };
-var _deleteNoteFromDb = function (cardId) {
-    try {
-        db_1.deleteItem("notes", cardId);
-    }
-    catch (err) {
-        console.error(err);
-    }
-};
-var _addCardToDb = function (note) {
-    try {
-        var location_1 = note.location, content = note.content;
-        db_1.addRow("notes", ["location", "content"], [location_1, content]);
-    }
-    catch (err) {
-        console.error(err);
-    }
-};
-var _updateCardsToDb = function (notes) {
-    try {
-        notes.forEach(function (note) {
-            var id = note.id, location = note.location, content = note.content;
-            db_1.updateRow("notes", id, ["location", "content"], [location, content]);
-        });
-    }
-    catch (err) {
-        console.error(err);
-    }
-};
